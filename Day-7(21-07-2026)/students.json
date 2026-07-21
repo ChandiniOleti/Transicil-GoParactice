@@ -1,0 +1,38 @@
+[
+ {
+  "id": 103,
+  "name": "Ram",
+  "age": 22,
+  "city": "Vijayawada"
+ },
+ {
+  "id": 101,
+  "name": "Chandini",
+  "age": 21,
+  "city": "Guntur"
+ },
+ {
+  "id": 102,
+  "name": "Sai",
+  "age": 20,
+  "city": "Bengalore"
+ },
+ {
+  "id": 104,
+  "name": "Oleti",
+  "age": 19,
+  "city": "Nrt"
+ },
+ {
+  "id": 104,
+  "name": "Oleti",
+  "age": 19,
+  "city": "Nrt"
+ },
+ {
+  "id": 104,
+  "name": "Oleti",
+  "age": 19,
+  "city": "Nrt"
+ }
+]
