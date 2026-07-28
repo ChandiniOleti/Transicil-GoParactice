@@ -1,48 +1,29 @@
--- name: GetAllUserDues :many
+-- name: GetMerchantFeeCollected :one
 SELECT
-    id,
-    name,
-    email,
-    credit_limit,
-    current_due
-FROM users;
+    merchant_id,
+    SUM(commission_amount) AS total_fee_collected
+FROM transactions
+WHERE merchant_id = ?
+GROUP BY merchant_id;
 
--- name: GetMerchantCommissionReport :many
-SELECT
-    m.id,
-    m.merchant_name,
-    SUM(t.commission_amount) AS total_commission
-FROM merchants m
-JOIN transactions t
-ON m.id = t.merchant_id
-GROUP BY m.id, m.merchant_name;
+-- name: GetUsersWithDue :many
+SELECT *
+FROM users
+WHERE current_due > 0
+ORDER BY current_due DESC;
 
--- name: GetTotalOutstandingDue :one
+-- name: GetUserDue :one
+SELECT *
+FROM users
+WHERE id = ?;
+
+-- name: GetUsersReachedCreditLimit :many
+SELECT *
+FROM users
+WHERE current_due >= credit_limit
+ORDER BY current_due DESC;
+
+-- name: GetTotalUserDues :one
 SELECT
     SUM(current_due) AS total_due
 FROM users;
-
--- name: GetTransactionReport :many
-SELECT
-    t.id,
-    u.name AS user_name,
-    m.merchant_name,
-    t.amount,
-    t.commission_percentage,
-    t.commission_amount,
-    t.transaction_date
-FROM transactions t
-JOIN users u
-ON t.user_id = u.id
-JOIN merchants m
-ON t.merchant_id = m.id;
-
--- name: GetMerchantTransactionCount :many
-SELECT
-    m.id,
-    m.merchant_name,
-    COUNT(t.id) AS total_transactions
-FROM merchants m
-LEFT JOIN transactions t
-ON m.id = t.merchant_id
-GROUP BY m.id, m.merchant_name;

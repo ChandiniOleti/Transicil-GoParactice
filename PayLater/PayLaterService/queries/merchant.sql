@@ -1,9 +1,10 @@
 -- name: CreateMerchant :execresult
 INSERT INTO merchants (
     merchant_name,
-    email,
+    phone,
     commission
-) VALUES (
+)
+VALUES (
     ?,
     ?,
     ?
@@ -22,8 +23,7 @@ WHERE id = ?;
 UPDATE merchants
 SET
     merchant_name = ?,
-    email = ?,
-    commission = ?
+    phone = ?
 WHERE id = ?;
 
 -- name: UpdateCommission :exec

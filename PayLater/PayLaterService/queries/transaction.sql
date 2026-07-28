@@ -5,7 +5,8 @@ INSERT INTO transactions (
     amount,
     commission_percentage,
     commission_amount
-) VALUES (
+)
+VALUES (
     ?,
     ?,
     ?,

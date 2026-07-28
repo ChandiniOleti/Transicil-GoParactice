@@ -3,13 +3,13 @@ CREATE TABLE users (
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     credit_limit DECIMAL(10,2) NOT NULL DEFAULT 2000.00,
-    current_due DECIMAL(10,2) DEFAULT 0.00
+    current_due DECIMAL(10,2) NOT NULL DEFAULT 0.00
 );
 
 CREATE TABLE merchants (
     id INT AUTO_INCREMENT PRIMARY KEY,
     merchant_name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
+    phone VARCHAR(15) NOT NULL UNIQUE,
     commission DECIMAL(5,2) NOT NULL
 );
 
