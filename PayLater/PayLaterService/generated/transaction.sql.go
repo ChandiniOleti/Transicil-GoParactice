@@ -16,9 +16,11 @@ INSERT INTO transactions (
     merchant_id,
     amount,
     commission_percentage,
-    commission_amount
+    commission_amount,
+    transaction_type
 )
 VALUES (
+    ?,
     ?,
     ?,
     ?,
@@ -28,11 +30,12 @@ VALUES (
 `
 
 type CreateTransactionParams struct {
-	UserID               int32  `json:"user_id"`
-	MerchantID           int32  `json:"merchant_id"`
-	Amount               string `json:"amount"`
-	CommissionPercentage string `json:"commission_percentage"`
-	CommissionAmount     string `json:"commission_amount"`
+	UserID               int32                       `json:"user_id"`
+	MerchantID           sql.NullInt32               `json:"merchant_id"`
+	Amount               string                      `json:"amount"`
+	CommissionPercentage string                      `json:"commission_percentage"`
+	CommissionAmount     string                      `json:"commission_amount"`
+	TransactionType      TransactionsTransactionType `json:"transaction_type"`
 }
 
 func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionParams) (sql.Result, error) {
@@ -42,11 +45,12 @@ func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionPa
 		arg.Amount,
 		arg.CommissionPercentage,
 		arg.CommissionAmount,
+		arg.TransactionType,
 	)
 }
 
 const getTransactionByID = `-- name: GetTransactionByID :one
-SELECT id, user_id, merchant_id, amount, commission_percentage, commission_amount, transaction_date
+SELECT id, user_id, merchant_id, amount, commission_percentage, commission_amount, transaction_type, transaction_date
 FROM transactions
 WHERE id = ?
 `
@@ -61,13 +65,14 @@ func (q *Queries) GetTransactionByID(ctx context.Context, id int32) (Transaction
 		&i.Amount,
 		&i.CommissionPercentage,
 		&i.CommissionAmount,
+		&i.TransactionType,
 		&i.TransactionDate,
 	)
 	return i, err
 }
 
 const getTransactions = `-- name: GetTransactions :many
-SELECT id, user_id, merchant_id, amount, commission_percentage, commission_amount, transaction_date
+SELECT id, user_id, merchant_id, amount, commission_percentage, commission_amount, transaction_type, transaction_date
 FROM transactions
 `
 
@@ -87,6 +92,7 @@ func (q *Queries) GetTransactions(ctx context.Context) ([]Transaction, error) {
 			&i.Amount,
 			&i.CommissionPercentage,
 			&i.CommissionAmount,
+			&i.TransactionType,
 			&i.TransactionDate,
 		); err != nil {
 			return nil, err
@@ -103,12 +109,12 @@ func (q *Queries) GetTransactions(ctx context.Context) ([]Transaction, error) {
 }
 
 const getTransactionsByMerchant = `-- name: GetTransactionsByMerchant :many
-SELECT id, user_id, merchant_id, amount, commission_percentage, commission_amount, transaction_date
+SELECT id, user_id, merchant_id, amount, commission_percentage, commission_amount, transaction_type, transaction_date
 FROM transactions
 WHERE merchant_id = ?
 `
 
-func (q *Queries) GetTransactionsByMerchant(ctx context.Context, merchantID int32) ([]Transaction, error) {
+func (q *Queries) GetTransactionsByMerchant(ctx context.Context, merchantID sql.NullInt32) ([]Transaction, error) {
 	rows, err := q.db.QueryContext(ctx, getTransactionsByMerchant, merchantID)
 	if err != nil {
 		return nil, err
@@ -124,6 +130,7 @@ func (q *Queries) GetTransactionsByMerchant(ctx context.Context, merchantID int3
 			&i.Amount,
 			&i.CommissionPercentage,
 			&i.CommissionAmount,
+			&i.TransactionType,
 			&i.TransactionDate,
 		); err != nil {
 			return nil, err
@@ -140,7 +147,7 @@ func (q *Queries) GetTransactionsByMerchant(ctx context.Context, merchantID int3
 }
 
 const getTransactionsByUser = `-- name: GetTransactionsByUser :many
-SELECT id, user_id, merchant_id, amount, commission_percentage, commission_amount, transaction_date
+SELECT id, user_id, merchant_id, amount, commission_percentage, commission_amount, transaction_type, transaction_date
 FROM transactions
 WHERE user_id = ?
 `
@@ -161,6 +168,7 @@ func (q *Queries) GetTransactionsByUser(ctx context.Context, userID int32) ([]Tr
 			&i.Amount,
 			&i.CommissionPercentage,
 			&i.CommissionAmount,
+			&i.TransactionType,
 			&i.TransactionDate,
 		); err != nil {
 			return nil, err

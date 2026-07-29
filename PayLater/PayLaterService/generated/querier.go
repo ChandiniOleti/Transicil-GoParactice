@@ -16,13 +16,14 @@ type Querier interface {
 	DeleteMerchant(ctx context.Context, id int32) error
 	DeleteUser(ctx context.Context, id int32) error
 	GetMerchantByID(ctx context.Context, id int32) (Merchant, error)
-	GetMerchantFeeCollected(ctx context.Context, merchantID int32) (GetMerchantFeeCollectedRow, error)
+	GetMerchantFeeCollected(ctx context.Context, merchantID sql.NullInt32) (GetMerchantFeeCollectedRow, error)
 	GetMerchants(ctx context.Context) ([]Merchant, error)
 	GetTotalUserDues(ctx context.Context) (interface{}, error)
 	GetTransactionByID(ctx context.Context, id int32) (Transaction, error)
 	GetTransactions(ctx context.Context) ([]Transaction, error)
-	GetTransactionsByMerchant(ctx context.Context, merchantID int32) ([]Transaction, error)
+	GetTransactionsByMerchant(ctx context.Context, merchantID sql.NullInt32) ([]Transaction, error)
 	GetTransactionsByUser(ctx context.Context, userID int32) ([]Transaction, error)
+	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, id int32) (User, error)
 	GetUserDue(ctx context.Context, id int32) (User, error)
 	GetUsers(ctx context.Context) ([]User, error)

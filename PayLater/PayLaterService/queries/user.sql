@@ -1,8 +1,13 @@
 -- name: CreateUser :execresult
 INSERT INTO users (
     name,
-    email
-) VALUES (
+    email,
+    password,
+    role
+)
+VALUES (
+    ?,
+    ?,
     ?,
     ?
 );
@@ -20,7 +25,8 @@ WHERE id = ?;
 UPDATE users
 SET
     name = ?,
-    email = ?
+    email = ?,
+    password = ?
 WHERE id = ?;
 
 -- name: DeleteUser :exec
@@ -32,3 +38,9 @@ UPDATE users
 SET
     current_due = ?
 WHERE id = ?;
+
+-- name: GetUserByEmail :one
+SELECT *
+FROM users
+WHERE email = ?
+LIMIT 1;

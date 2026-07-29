@@ -13,20 +13,32 @@ import (
 const createUser = `-- name: CreateUser :execresult
 INSERT INTO users (
     name,
-    email
-) VALUES (
+    email,
+    password,
+    role
+)
+VALUES (
+    ?,
+    ?,
     ?,
     ?
 )
 `
 
 type CreateUserParams struct {
-	Name  string `json:"name"`
-	Email string `json:"email"`
+	Name     string    `json:"name"`
+	Email    string    `json:"email"`
+	Password string    `json:"password"`
+	Role     UsersRole `json:"role"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, createUser, arg.Name, arg.Email)
+	return q.db.ExecContext(ctx, createUser,
+		arg.Name,
+		arg.Email,
+		arg.Password,
+		arg.Role,
+	)
 }
 
 const deleteUser = `-- name: DeleteUser :exec
@@ -39,8 +51,37 @@ func (q *Queries) DeleteUser(ctx context.Context, id int32) error {
 	return err
 }
 
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT id, name, email, password, role, credit_limit, current_due
+FROM users
+WHERE email = ?
+LIMIT 1
+`
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.Password,
+		&i.Role,
+		&i.CreditLimit,
+		&i.CurrentDue,
+	)
+	return i, err
+}
+
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, name, email, credit_limit, current_due
+SELECT
+    id,
+    name,
+    email,
+    password,
+    role,
+    credit_limit,
+    current_due
 FROM users
 WHERE id = ?
 `
@@ -52,6 +93,8 @@ func (q *Queries) GetUserByID(ctx context.Context, id int32) (User, error) {
 		&i.ID,
 		&i.Name,
 		&i.Email,
+		&i.Password,
+		&i.Role,
 		&i.CreditLimit,
 		&i.CurrentDue,
 	)
@@ -59,7 +102,14 @@ func (q *Queries) GetUserByID(ctx context.Context, id int32) (User, error) {
 }
 
 const getUsers = `-- name: GetUsers :many
-SELECT id, name, email, credit_limit, current_due
+SELECT
+    id,
+    name,
+    email,
+    password,
+    role,
+    credit_limit,
+    current_due
 FROM users
 `
 
@@ -76,6 +126,8 @@ func (q *Queries) GetUsers(ctx context.Context) ([]User, error) {
 			&i.ID,
 			&i.Name,
 			&i.Email,
+			&i.Password,
+			&i.Role,
 			&i.CreditLimit,
 			&i.CurrentDue,
 		); err != nil {
@@ -113,17 +165,24 @@ const updateUser = `-- name: UpdateUser :exec
 UPDATE users
 SET
     name = ?,
-    email = ?
+    email = ?,
+    password = ?
 WHERE id = ?
 `
 
 type UpdateUserParams struct {
-	Name  string `json:"name"`
-	Email string `json:"email"`
-	ID    int32  `json:"id"`
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	ID       int32  `json:"id"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
-	_, err := q.db.ExecContext(ctx, updateUser, arg.Name, arg.Email, arg.ID)
+	_, err := q.db.ExecContext(ctx, updateUser,
+		arg.Name,
+		arg.Email,
+		arg.Password,
+		arg.ID,
+	)
 	return err
 }

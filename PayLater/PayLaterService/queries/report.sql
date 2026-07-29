@@ -4,6 +4,7 @@ SELECT
     SUM(commission_amount) AS total_fee_collected
 FROM transactions
 WHERE merchant_id = ?
+  AND transaction_type = 'PURCHASE'
 GROUP BY merchant_id;
 
 -- name: GetUsersWithDue :many

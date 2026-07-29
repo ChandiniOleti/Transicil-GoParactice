@@ -1,30 +1,43 @@
 package handlers
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 
 	"paylaterservice/services"
 )
 
-func Payback(c *gin.Context) {
 
-	var request services.PaybackRequest
+func LoginHandler(c *gin.Context) {
+
+	var request services.LoginRequest
+
 
 	if err := c.ShouldBindJSON(&request); err != nil {
+
 		c.JSON(400, gin.H{
 			"error": err.Error(),
 		})
+
 		return
 	}
 
-	response, err := services.ProcessPayback(request)
+
+	token, err := services.Login(request)
+
 
 	if err != nil {
-		c.JSON(400, gin.H{
+
+		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": err.Error(),
 		})
+
 		return
 	}
 
-	c.JSON(200, response)
+
+	c.JSON(http.StatusOK, gin.H{
+		"token": token,
+	})
 }

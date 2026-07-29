@@ -7,6 +7,15 @@ import (
 	"paylaterservice/generated"
 )
 
+type UserResponse struct {
+	ID          int32  `json:"id"`
+	Name        string `json:"name"`
+	Email       string `json:"email"`
+	Role        string `json:"role"`
+	CreditLimit string `json:"credit_limit"`
+	CurrentDue  string `json:"current_due"`
+}
+
 func CreateUser(user generated.CreateUserParams) error {
 
 	_, err := config.Queries.CreateUser(context.Background(), user)
@@ -18,7 +27,8 @@ func CreateUser(user generated.CreateUserParams) error {
 	return nil
 }
 
-func GetUsers() ([]generated.User, error) {
+
+func GetUsers() ([]UserResponse, error) {
 
 	users, err := config.Queries.GetUsers(context.Background())
 
@@ -26,19 +36,46 @@ func GetUsers() ([]generated.User, error) {
 		return nil, err
 	}
 
-	return users, nil
+	var response []UserResponse
+
+	for _, user := range users {
+
+		response = append(response, UserResponse{
+			ID:          user.ID,
+			Name:        user.Name,
+			Email:       user.Email,
+			Role:        string(user.Role),
+			CreditLimit: user.CreditLimit,
+			CurrentDue:  user.CurrentDue,
+		})
+	}
+
+	return response, nil
 }
 
-func GetUserByID(id int32) (generated.User, error) {
+
+func GetUserByID(id int32) (UserResponse, error) {
 
 	user, err := config.Queries.GetUserByID(context.Background(), id)
 
 	if err != nil {
-		return generated.User{}, err
+		return UserResponse{}, err
 	}
 
-	return user, nil
+
+	response := UserResponse{
+		ID:          user.ID,
+		Name:        user.Name,
+		Email:       user.Email,
+		Role:        string(user.Role),
+		CreditLimit: user.CreditLimit,
+		CurrentDue:  user.CurrentDue,
+	}
+
+
+	return response, nil
 }
+
 
 func UpdateUser(user generated.UpdateUserParams) error {
 
@@ -50,6 +87,7 @@ func UpdateUser(user generated.UpdateUserParams) error {
 
 	return nil
 }
+
 
 func DeleteUser(id int32) error {
 

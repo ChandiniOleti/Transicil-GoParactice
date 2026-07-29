@@ -4,9 +4,11 @@ INSERT INTO transactions (
     merchant_id,
     amount,
     commission_percentage,
-    commission_amount
+    commission_amount,
+    transaction_type
 )
 VALUES (
+    ?,
     ?,
     ?,
     ?,
