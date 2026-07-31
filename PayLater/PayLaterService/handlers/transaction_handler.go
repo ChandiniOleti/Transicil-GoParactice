@@ -11,9 +11,8 @@ import (
 )
 
 type TransactionRequest struct {
-	UserID     int32  `json:"user_id"`
-	MerchantID int32  `json:"merchant_id"`
-	Amount     string `json:"amount"`
+    MerchantID int32  `json:"merchant_id"`
+    Amount     string `json:"amount"`
 }
 
 // Create Transaction
@@ -28,8 +27,10 @@ func CreateTransaction(c *gin.Context) {
 		return
 	}
 
+	userID := int32(c.GetInt("user_id"))
+
 	transaction := generated.CreateTransactionParams{
-		UserID: request.UserID,
+    UserID: userID,
 		MerchantID: sql.NullInt32{
 			Int32: request.MerchantID,
 			Valid: true,

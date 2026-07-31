@@ -52,51 +52,18 @@ func (ns NullTransactionsTransactionType) Value() (driver.Value, error) {
 	return string(ns.TransactionsTransactionType), nil
 }
 
-type UsersRole string
-
-const (
-	UsersRoleADMIN UsersRole = "ADMIN"
-	UsersRoleUSER  UsersRole = "USER"
-)
-
-func (e *UsersRole) Scan(src interface{}) error {
-	switch s := src.(type) {
-	case []byte:
-		*e = UsersRole(s)
-	case string:
-		*e = UsersRole(s)
-	default:
-		return fmt.Errorf("unsupported scan type for UsersRole: %T", src)
-	}
-	return nil
-}
-
-type NullUsersRole struct {
-	UsersRole UsersRole `json:"users_role"`
-	Valid     bool      `json:"valid"` // Valid is true if UsersRole is not NULL
-}
-
-// Scan implements the Scanner interface.
-func (ns *NullUsersRole) Scan(value interface{}) error {
-	if value == nil {
-		ns.UsersRole, ns.Valid = "", false
-		return nil
-	}
-	ns.Valid = true
-	return ns.UsersRole.Scan(value)
-}
-
-// Value implements the driver Valuer interface.
-func (ns NullUsersRole) Value() (driver.Value, error) {
-	if !ns.Valid {
-		return nil, nil
-	}
-	return string(ns.UsersRole), nil
+type Admin struct {
+	ID       int32  `json:"id"`
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type Merchant struct {
 	ID           int32  `json:"id"`
 	MerchantName string `json:"merchant_name"`
+	Email        string `json:"email"`
+	Password     string `json:"password"`
 	Phone        string `json:"phone"`
 	Commission   string `json:"commission"`
 }
@@ -113,11 +80,10 @@ type Transaction struct {
 }
 
 type User struct {
-	ID          int32     `json:"id"`
-	Name        string    `json:"name"`
-	Email       string    `json:"email"`
-	Password    string    `json:"password"`
-	Role        UsersRole `json:"role"`
-	CreditLimit string    `json:"credit_limit"`
-	CurrentDue  string    `json:"current_due"`
+	ID          int32  `json:"id"`
+	Name        string `json:"name"`
+	Email       string `json:"email"`
+	Password    string `json:"password"`
+	CreditLimit string `json:"credit_limit"`
+	CurrentDue  string `json:"current_due"`
 }

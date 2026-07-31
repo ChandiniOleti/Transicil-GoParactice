@@ -14,9 +14,13 @@ const createMerchant = `-- name: CreateMerchant :execresult
 INSERT INTO merchants (
     merchant_name,
     phone,
-    commission
+    commission,
+    email,
+    password
 )
 VALUES (
+    ?,
+    ?,
     ?,
     ?,
     ?
@@ -27,10 +31,18 @@ type CreateMerchantParams struct {
 	MerchantName string `json:"merchant_name"`
 	Phone        string `json:"phone"`
 	Commission   string `json:"commission"`
+	Email        string `json:"email"`
+	Password     string `json:"password"`
 }
 
 func (q *Queries) CreateMerchant(ctx context.Context, arg CreateMerchantParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, createMerchant, arg.MerchantName, arg.Phone, arg.Commission)
+	return q.db.ExecContext(ctx, createMerchant,
+		arg.MerchantName,
+		arg.Phone,
+		arg.Commission,
+		arg.Email,
+		arg.Password,
+	)
 }
 
 const deleteMerchant = `-- name: DeleteMerchant :exec
@@ -43,8 +55,28 @@ func (q *Queries) DeleteMerchant(ctx context.Context, id int32) error {
 	return err
 }
 
+const getMerchantByEmail = `-- name: GetMerchantByEmail :one
+SELECT id, merchant_name, email, password, phone, commission
+FROM merchants
+WHERE email = ?
+`
+
+func (q *Queries) GetMerchantByEmail(ctx context.Context, email string) (Merchant, error) {
+	row := q.db.QueryRowContext(ctx, getMerchantByEmail, email)
+	var i Merchant
+	err := row.Scan(
+		&i.ID,
+		&i.MerchantName,
+		&i.Email,
+		&i.Password,
+		&i.Phone,
+		&i.Commission,
+	)
+	return i, err
+}
+
 const getMerchantByID = `-- name: GetMerchantByID :one
-SELECT id, merchant_name, phone, commission
+SELECT id, merchant_name, email, password, phone, commission
 FROM merchants
 WHERE id = ?
 `
@@ -55,6 +87,8 @@ func (q *Queries) GetMerchantByID(ctx context.Context, id int32) (Merchant, erro
 	err := row.Scan(
 		&i.ID,
 		&i.MerchantName,
+		&i.Email,
+		&i.Password,
 		&i.Phone,
 		&i.Commission,
 	)
@@ -62,7 +96,7 @@ func (q *Queries) GetMerchantByID(ctx context.Context, id int32) (Merchant, erro
 }
 
 const getMerchants = `-- name: GetMerchants :many
-SELECT id, merchant_name, phone, commission
+SELECT id, merchant_name, email, password, phone, commission
 FROM merchants
 `
 
@@ -78,6 +112,8 @@ func (q *Queries) GetMerchants(ctx context.Context) ([]Merchant, error) {
 		if err := rows.Scan(
 			&i.ID,
 			&i.MerchantName,
+			&i.Email,
+			&i.Password,
 			&i.Phone,
 			&i.Commission,
 		); err != nil {
@@ -96,8 +132,7 @@ func (q *Queries) GetMerchants(ctx context.Context) ([]Merchant, error) {
 
 const updateCommission = `-- name: UpdateCommission :exec
 UPDATE merchants
-SET
-    commission = ?
+SET commission = ?
 WHERE id = ?
 `
 
@@ -115,17 +150,30 @@ const updateMerchant = `-- name: UpdateMerchant :exec
 UPDATE merchants
 SET
     merchant_name = ?,
-    phone = ?
+    phone = ?,
+    commission = ?,
+    email = ?,
+    password = ?
 WHERE id = ?
 `
 
 type UpdateMerchantParams struct {
 	MerchantName string `json:"merchant_name"`
 	Phone        string `json:"phone"`
+	Commission   string `json:"commission"`
+	Email        string `json:"email"`
+	Password     string `json:"password"`
 	ID           int32  `json:"id"`
 }
 
 func (q *Queries) UpdateMerchant(ctx context.Context, arg UpdateMerchantParams) error {
-	_, err := q.db.ExecContext(ctx, updateMerchant, arg.MerchantName, arg.Phone, arg.ID)
+	_, err := q.db.ExecContext(ctx, updateMerchant,
+		arg.MerchantName,
+		arg.Phone,
+		arg.Commission,
+		arg.Email,
+		arg.Password,
+		arg.ID,
+	)
 	return err
 }

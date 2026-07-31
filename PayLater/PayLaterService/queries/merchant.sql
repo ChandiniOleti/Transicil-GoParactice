@@ -2,9 +2,13 @@
 INSERT INTO merchants (
     merchant_name,
     phone,
-    commission
+    commission,
+    email,
+    password
 )
 VALUES (
+    ?,
+    ?,
     ?,
     ?,
     ?
@@ -19,17 +23,24 @@ SELECT *
 FROM merchants
 WHERE id = ?;
 
+-- name: GetMerchantByEmail :one
+SELECT *
+FROM merchants
+WHERE email = ?;
+
 -- name: UpdateMerchant :exec
 UPDATE merchants
 SET
     merchant_name = ?,
-    phone = ?
+    phone = ?,
+    commission = ?,
+    email = ?,
+    password = ?
 WHERE id = ?;
 
 -- name: UpdateCommission :exec
 UPDATE merchants
-SET
-    commission = ?
+SET commission = ?
 WHERE id = ?;
 
 -- name: DeleteMerchant :exec

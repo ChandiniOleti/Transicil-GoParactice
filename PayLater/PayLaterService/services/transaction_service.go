@@ -2,33 +2,49 @@ package services
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"strconv"
 
 	"paylaterservice/config"
 	"paylaterservice/generated"
-	"database/sql"
 )
 
-// Process Transaction (Purchase)
+// ProcessTransaction handles a purchase transaction.
+//
+// Flow:
+// 1. Get user details.
+// 2. Get merchant details.
+// 3. Check available credit.
+// 4. Calculate merchant commission.
+// 5. Save the purchase transaction.
+// 6. Update the user's current due.
+//
+// Example:
+// Credit Limit : 2000
+// Current Due  : 500
+// Purchase     : 300
+//
+// New Due      : 800
+// Available Credit : 1200
 func ProcessTransaction(transaction generated.CreateTransactionParams) (map[string]interface{}, error) {
 
 	ctx := context.Background()
 
-	// Get User
+	// Fetch user details using User ID.
 	user, err := config.Queries.GetUserByID(ctx, transaction.UserID)
 	if err != nil {
 		return nil, err
 	}
 
-	// Get Merchant
+	// Fetch merchant details using Merchant ID.
 	merchant, err := config.Queries.GetMerchantByID(ctx, transaction.MerchantID.Int32)
 	if err != nil {
 		return nil, err
 	}
 
-	// Convert Values
+	// Convert string values to float for calculations.
 	creditLimit, err := strconv.ParseFloat(user.CreditLimit, 64)
 	if err != nil {
 		return nil, err
@@ -49,28 +65,32 @@ func ProcessTransaction(transaction generated.CreateTransactionParams) (map[stri
 		return nil, err
 	}
 
-	// Available Credit
+	// Calculate available credit.
 	availableCredit := creditLimit - currentDue
 
+	// Do not allow purchase if the credit limit is exceeded.
 	if amount > availableCredit {
 		return nil, errors.New("credit limit exceeded")
 	}
 
-	// Commission Calculation
+	// Calculate merchant commission.
+	//
+	// Formula:
+	// Commission = Purchase Amount × Commission Percentage / 100
 	commissionAmount := (amount * commissionPercent) / 100
 
-	// Set Transaction Values
+	// Set commission values and transaction type.
 	transaction.CommissionPercentage = fmt.Sprintf("%.2f", commissionPercent)
 	transaction.CommissionAmount = fmt.Sprintf("%.2f", commissionAmount)
 	transaction.TransactionType = generated.TransactionsTransactionTypePURCHASE
 
-	// Insert Transaction
+	// Save the purchase transaction into the transactions table.
 	_, err = config.Queries.CreateTransaction(ctx, transaction)
 	if err != nil {
 		return nil, err
 	}
 
-	// Update Current Due
+	// Update user's current due after successful purchase.
 	newDue := currentDue + amount
 
 	err = config.Queries.UpdateCurrentDue(ctx, generated.UpdateCurrentDueParams{
@@ -82,6 +102,7 @@ func ProcessTransaction(transaction generated.CreateTransactionParams) (map[stri
 		return nil, err
 	}
 
+	// Return transaction summary.
 	response := map[string]interface{}{
 		"message":               "Transaction Successful",
 		"user_id":               transaction.UserID,
@@ -97,10 +118,13 @@ func ProcessTransaction(transaction generated.CreateTransactionParams) (map[stri
 	return response, nil
 }
 
-
-// Get All Transactions
+// GetTransactions returns all transactions.
+//
+// Example:
+// GET /transactions
 func GetTransactions() ([]generated.Transaction, error) {
 
+	// Fetch all transaction records.
 	transactions, err := config.Queries.GetTransactions(context.Background())
 
 	if err != nil {
@@ -110,10 +134,13 @@ func GetTransactions() ([]generated.Transaction, error) {
 	return transactions, nil
 }
 
-
-// Get Transaction By ID
+// GetTransactionByID returns a single transaction using its ID.
+//
+// Example:
+// GET /transactions/1
 func GetTransactionByID(id int32) (generated.Transaction, error) {
 
+	// Fetch transaction by ID.
 	transaction, err := config.Queries.GetTransactionByID(context.Background(), id)
 
 	if err != nil {
@@ -123,10 +150,13 @@ func GetTransactionByID(id int32) (generated.Transaction, error) {
 	return transaction, nil
 }
 
-
-// Get Transactions By User
+// GetTransactionsByUser returns all transactions made by a specific user.
+//
+// Example:
+// GET /transactions/user/1
 func GetTransactionsByUser(id int32) ([]generated.Transaction, error) {
 
+	// Fetch transactions using User ID.
 	transactions, err := config.Queries.GetTransactionsByUser(context.Background(), id)
 
 	if err != nil {
@@ -136,10 +166,19 @@ func GetTransactionsByUser(id int32) ([]generated.Transaction, error) {
 	return transactions, nil
 }
 
-
-// Get Transactions By Merchant
+// GetTransactionsByMerchant returns all purchase transactions
+// performed through a specific merchant.
+//
+// Note:
+// Payback transactions have MerchantID = NULL,
+// so they will not be included in this report.
+//
+// Example:
+// GET /transactions/merchant/2
 func GetTransactionsByMerchant(id int32) ([]generated.Transaction, error) {
 
+	// Convert Merchant ID into sql.NullInt32 because
+	// MerchantID is nullable in the database.
 	transactions, err := config.Queries.GetTransactionsByMerchant(
 		context.Background(),
 		sql.NullInt32{
@@ -148,11 +187,9 @@ func GetTransactionsByMerchant(id int32) ([]generated.Transaction, error) {
 		},
 	)
 
-
 	if err != nil {
 		return nil, err
 	}
-
 
 	return transactions, nil
 }

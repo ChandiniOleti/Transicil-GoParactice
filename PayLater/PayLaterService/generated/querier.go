@@ -10,11 +10,16 @@ import (
 )
 
 type Querier interface {
+	CreateAdmin(ctx context.Context, arg CreateAdminParams) (sql.Result, error)
 	CreateMerchant(ctx context.Context, arg CreateMerchantParams) (sql.Result, error)
 	CreateTransaction(ctx context.Context, arg CreateTransactionParams) (sql.Result, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (sql.Result, error)
 	DeleteMerchant(ctx context.Context, id int32) error
 	DeleteUser(ctx context.Context, id int32) error
+	GetAdminByEmail(ctx context.Context, email string) (Admin, error)
+	GetAdminByID(ctx context.Context, id int32) (Admin, error)
+	GetAdmins(ctx context.Context) ([]Admin, error)
+	GetMerchantByEmail(ctx context.Context, email string) (Merchant, error)
 	GetMerchantByID(ctx context.Context, id int32) (Merchant, error)
 	GetMerchantFeeCollected(ctx context.Context, merchantID sql.NullInt32) (GetMerchantFeeCollectedRow, error)
 	GetMerchants(ctx context.Context) ([]Merchant, error)

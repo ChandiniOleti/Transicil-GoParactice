@@ -46,7 +46,7 @@ func (q *Queries) GetTotalUserDues(ctx context.Context) (interface{}, error) {
 }
 
 const getUserDue = `-- name: GetUserDue :one
-SELECT id, name, email, password, role, credit_limit, current_due
+SELECT id, name, email, password, credit_limit, current_due
 FROM users
 WHERE id = ?
 `
@@ -59,7 +59,6 @@ func (q *Queries) GetUserDue(ctx context.Context, id int32) (User, error) {
 		&i.Name,
 		&i.Email,
 		&i.Password,
-		&i.Role,
 		&i.CreditLimit,
 		&i.CurrentDue,
 	)
@@ -67,7 +66,7 @@ func (q *Queries) GetUserDue(ctx context.Context, id int32) (User, error) {
 }
 
 const getUsersReachedCreditLimit = `-- name: GetUsersReachedCreditLimit :many
-SELECT id, name, email, password, role, credit_limit, current_due
+SELECT id, name, email, password, credit_limit, current_due
 FROM users
 WHERE current_due >= credit_limit
 ORDER BY current_due DESC
@@ -87,7 +86,6 @@ func (q *Queries) GetUsersReachedCreditLimit(ctx context.Context) ([]User, error
 			&i.Name,
 			&i.Email,
 			&i.Password,
-			&i.Role,
 			&i.CreditLimit,
 			&i.CurrentDue,
 		); err != nil {
@@ -105,7 +103,7 @@ func (q *Queries) GetUsersReachedCreditLimit(ctx context.Context) ([]User, error
 }
 
 const getUsersWithDue = `-- name: GetUsersWithDue :many
-SELECT id, name, email, password, role, credit_limit, current_due
+SELECT id, name, email, password, credit_limit, current_due
 FROM users
 WHERE current_due > 0
 ORDER BY current_due DESC
@@ -125,7 +123,6 @@ func (q *Queries) GetUsersWithDue(ctx context.Context) ([]User, error) {
 			&i.Name,
 			&i.Email,
 			&i.Password,
-			&i.Role,
 			&i.CreditLimit,
 			&i.CurrentDue,
 		); err != nil {

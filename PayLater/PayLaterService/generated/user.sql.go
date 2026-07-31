@@ -14,11 +14,9 @@ const createUser = `-- name: CreateUser :execresult
 INSERT INTO users (
     name,
     email,
-    password,
-    role
+    password   
 )
 VALUES (
-    ?,
     ?,
     ?,
     ?
@@ -26,19 +24,13 @@ VALUES (
 `
 
 type CreateUserParams struct {
-	Name     string    `json:"name"`
-	Email    string    `json:"email"`
-	Password string    `json:"password"`
-	Role     UsersRole `json:"role"`
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, createUser,
-		arg.Name,
-		arg.Email,
-		arg.Password,
-		arg.Role,
-	)
+	return q.db.ExecContext(ctx, createUser, arg.Name, arg.Email, arg.Password)
 }
 
 const deleteUser = `-- name: DeleteUser :exec
@@ -52,7 +44,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id int32) error {
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, name, email, password, role, credit_limit, current_due
+SELECT id, name, email, password, credit_limit, current_due
 FROM users
 WHERE email = ?
 LIMIT 1
@@ -66,7 +58,6 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.Name,
 		&i.Email,
 		&i.Password,
-		&i.Role,
 		&i.CreditLimit,
 		&i.CurrentDue,
 	)
@@ -74,14 +65,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT
-    id,
-    name,
-    email,
-    password,
-    role,
-    credit_limit,
-    current_due
+SELECT id, name, email, password, credit_limit, current_due
 FROM users
 WHERE id = ?
 `
@@ -94,7 +78,6 @@ func (q *Queries) GetUserByID(ctx context.Context, id int32) (User, error) {
 		&i.Name,
 		&i.Email,
 		&i.Password,
-		&i.Role,
 		&i.CreditLimit,
 		&i.CurrentDue,
 	)
@@ -102,14 +85,7 @@ func (q *Queries) GetUserByID(ctx context.Context, id int32) (User, error) {
 }
 
 const getUsers = `-- name: GetUsers :many
-SELECT
-    id,
-    name,
-    email,
-    password,
-    role,
-    credit_limit,
-    current_due
+SELECT id, name, email, password, credit_limit, current_due
 FROM users
 `
 
@@ -127,7 +103,6 @@ func (q *Queries) GetUsers(ctx context.Context) ([]User, error) {
 			&i.Name,
 			&i.Email,
 			&i.Password,
-			&i.Role,
 			&i.CreditLimit,
 			&i.CurrentDue,
 		); err != nil {
