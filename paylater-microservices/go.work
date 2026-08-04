@@ -1,0 +1,13 @@
+go 1.25.0
+
+use (
+	./APIGateway
+	./AuthService
+	./MerchantService
+	./PayLaterService
+	./PaybackService
+	./ReportService
+	./TransactionService
+	./UserService
+	./shared
+)

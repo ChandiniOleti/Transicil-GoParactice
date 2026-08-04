@@ -1,0 +1,41 @@
+# Binaries
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+
+# Coverage / test output
+coverage.*
+*.out
+*.coverprofile
+
+# Environment / secrets
+.env
+.env.local
+.env.*.local
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Dependencies / build cache
+vendor/
+tmp/
+temp/
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Go workspace lock (optional local)
+# go.work.sum may be committed; ignore local override artifacts

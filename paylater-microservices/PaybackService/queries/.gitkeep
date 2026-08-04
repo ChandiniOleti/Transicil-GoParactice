@@ -1,0 +1,2 @@
+-- No local SQL queries. Payback orchestrates via REST:
+-- User Service (get user / update due) and Transaction Service (PAYBACK row).

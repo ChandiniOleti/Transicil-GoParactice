@@ -1,0 +1,2 @@
+-- Monolith no longer owns domain queries.
+-- Reports, users, merchants, and transactions live in microservices.
