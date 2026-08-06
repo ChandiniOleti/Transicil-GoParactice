@@ -1,0 +1,190 @@
+
+
+services:
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+
+    restart: always
+
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: paylaterdb
+      MYSQL_USER: chandini
+      MYSQL_PASSWORD: Chandini@123
+
+    ports:
+      - "3306:3306"
+
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+    networks:
+      - paylater-network
+
+  authservice:
+    build:
+      context: .
+      dockerfile: AuthService/Dockerfile
+
+    image: authservice
+    container_name: authservice
+
+    restart: always
+
+    env_file:
+      - AuthService/.env
+
+    ports:
+      - "8081:8081"
+
+    depends_on:
+      - mysql
+
+    networks:
+      - paylater-network
+
+  userservice:
+    build:
+      context: .
+      dockerfile: UserService/Dockerfile
+
+    image: userservice
+    container_name: userservice
+
+    restart: always
+
+    env_file:
+      - UserService/.env
+
+    ports:
+      - "8082:8082"
+
+    depends_on:
+      - mysql
+
+    networks:
+      - paylater-network
+
+  merchantservice:
+    build:
+      context: .
+      dockerfile: MerchantService/Dockerfile
+
+    image: merchantservice
+    container_name: merchantservice
+
+    restart: always
+
+    env_file:
+      - MerchantService/.env
+
+    ports:
+      - "8083:8083"
+
+    depends_on:
+      - mysql
+
+    networks:
+      - paylater-network
+
+  transactionservice:
+    build:
+      context: .
+      dockerfile: TransactionService/Dockerfile
+
+    image: transactionservice
+    container_name: transactionservice
+
+    restart: always
+
+    env_file:
+      - TransactionService/.env
+
+    ports:
+      - "8084:8084"
+
+    depends_on:
+      - mysql
+
+    networks:
+      - paylater-network
+
+  paybackservice:
+    build:
+      context: .
+      dockerfile: PaybackService/Dockerfile
+
+    image: paybackservice
+    container_name: paybackservice
+
+    restart: always
+
+    env_file:
+      - PaybackService/.env
+
+    ports:
+      - "8085:8085"
+
+    depends_on:
+      - mysql
+
+    networks:
+      - paylater-network
+
+  reportservice:
+    build:
+      context: .
+      dockerfile: ReportService/Dockerfile
+
+    image: reportservice
+    container_name: reportservice
+
+    restart: always
+
+    env_file:
+      - ReportService/.env
+
+    ports:
+      - "8086:8086"
+
+    depends_on:
+      - mysql
+
+    networks:
+      - paylater-network
+
+  apigateway:
+    build:
+      context: .
+      dockerfile: APIGateway/Dockerfile
+
+    image: apigateway
+    container_name: apigateway
+
+    restart: always
+
+    env_file:
+      - APIGateway/.env
+
+    ports:
+      - "8080:8080"
+
+    depends_on:
+      - authservice
+      - userservice
+      - merchantservice
+      - transactionservice
+      - paybackservice
+      - reportservice
+
+    networks:
+      - paylater-network
+
+volumes:
+  mysql-data:
+
+networks:
+  paylater-network:
+    driver: bridge
