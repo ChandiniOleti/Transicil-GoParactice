@@ -97,6 +97,70 @@ PayLater/
 
 ## How to Run
 
+
+## Run with Docker
+
+### Prerequisites
+
+- Docker
+- Docker Compose
+
+### Clone the repository
+
+```bash
+git clone https://github.com/<your-username>/<your-repository>.git
+cd paylater-microservices
+```
+
+### Configure Environment Files
+
+Copy each `.env.example` file as `.env`.
+
+Linux / WSL:
+
+```bash
+cp AuthService/.env.example AuthService/.env
+cp UserService/.env.example UserService/.env
+cp MerchantService/.env.example MerchantService/.env
+cp TransactionService/.env.example TransactionService/.env
+cp PaybackService/.env.example PaybackService/.env
+cp ReportService/.env.example ReportService/.env
+cp APIGateway/.env.example APIGateway/.env
+```
+
+Update the values inside each `.env` file.
+
+### Start the application
+
+```bash
+docker compose up -d
+```
+
+### Check running containers
+
+```bash
+docker compose ps
+```
+
+### Stop all containers
+
+```bash
+docker compose down
+```
+
+
+## Docker Hub Images
+
+The following pre-built Docker images are available:
+
+- chandini9/apigateway
+- chandini9/authservice
+- chandini9/userservice
+- chandini9/merchantservice
+- chandini9/transactionservice
+- chandini9/paybackservice
+- chandini9/reportservice
+
 ### Prerequisites
 
 - Go 1.25+
