@@ -1,5 +1,3 @@
-
-
 services:
 
   mysql:
@@ -23,12 +21,9 @@ services:
     networks:
       - paylater-network
 
-  authservice:
-    build:
-      context: .
-      dockerfile: AuthService/Dockerfile
 
-    image: authservice
+  authservice:
+    image: chandini9/authservice:latest
     container_name: authservice
 
     restart: always
@@ -45,12 +40,9 @@ services:
     networks:
       - paylater-network
 
-  userservice:
-    build:
-      context: .
-      dockerfile: UserService/Dockerfile
 
-    image: userservice
+  userservice:
+    image: chandini9/userservice:latest
     container_name: userservice
 
     restart: always
@@ -67,12 +59,9 @@ services:
     networks:
       - paylater-network
 
-  merchantservice:
-    build:
-      context: .
-      dockerfile: MerchantService/Dockerfile
 
-    image: merchantservice
+  merchantservice:
+    image: chandini9/merchantservice:latest
     container_name: merchantservice
 
     restart: always
@@ -89,12 +78,9 @@ services:
     networks:
       - paylater-network
 
-  transactionservice:
-    build:
-      context: .
-      dockerfile: TransactionService/Dockerfile
 
-    image: transactionservice
+  transactionservice:
+    image: chandini9/transactionservice:latest
     container_name: transactionservice
 
     restart: always
@@ -111,12 +97,9 @@ services:
     networks:
       - paylater-network
 
-  paybackservice:
-    build:
-      context: .
-      dockerfile: PaybackService/Dockerfile
 
-    image: paybackservice
+  paybackservice:
+    image: chandini9/paybackservice:latest
     container_name: paybackservice
 
     restart: always
@@ -133,12 +116,9 @@ services:
     networks:
       - paylater-network
 
-  reportservice:
-    build:
-      context: .
-      dockerfile: ReportService/Dockerfile
 
-    image: reportservice
+  reportservice:
+    image: chandini9/reportservice:latest
     container_name: reportservice
 
     restart: always
@@ -155,12 +135,9 @@ services:
     networks:
       - paylater-network
 
-  apigateway:
-    build:
-      context: .
-      dockerfile: APIGateway/Dockerfile
 
-    image: apigateway
+  apigateway:
+    image: chandini9/apigateway:latest
     container_name: apigateway
 
     restart: always
@@ -182,8 +159,10 @@ services:
     networks:
       - paylater-network
 
+
 volumes:
   mysql-data:
+
 
 networks:
   paylater-network:

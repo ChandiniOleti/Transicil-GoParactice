@@ -4,7 +4,6 @@ use (
 	./APIGateway
 	./AuthService
 	./MerchantService
-	./PayLaterService
 	./PaybackService
 	./ReportService
 	./TransactionService
