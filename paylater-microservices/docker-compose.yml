@@ -7,10 +7,10 @@ services:
     restart: always
 
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: paylaterdb
-      MYSQL_USER: chandini
-      MYSQL_PASSWORD: Chandini@123
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
 
     ports:
       - "3306:3306"
@@ -28,8 +28,18 @@ services:
 
     restart: always
 
-    env_file:
-      - AuthService/.env
+    environment:
+      SERVICE_NAME: AuthService
+      SERVICE_PORT: 8081
+
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_NAME: ${DB_NAME}
+
+      JWT_SECRET: ${JWT_SECRET}
+      INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN}
 
     ports:
       - "8081:8081"
@@ -47,8 +57,18 @@ services:
 
     restart: always
 
-    env_file:
-      - UserService/.env
+    environment:
+      SERVICE_NAME: UserService
+      SERVICE_PORT: 8082
+
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_NAME: ${DB_NAME}
+
+      JWT_SECRET: ${JWT_SECRET}
+      INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN}
 
     ports:
       - "8082:8082"
@@ -66,8 +86,18 @@ services:
 
     restart: always
 
-    env_file:
-      - MerchantService/.env
+    environment:
+      SERVICE_NAME: MerchantService
+      SERVICE_PORT: 8083
+
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_NAME: ${DB_NAME}
+
+      JWT_SECRET: ${JWT_SECRET}
+      INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN}
 
     ports:
       - "8083:8083"
@@ -85,8 +115,21 @@ services:
 
     restart: always
 
-    env_file:
-      - TransactionService/.env
+    environment:
+      SERVICE_NAME: TransactionService
+      SERVICE_PORT: 8084
+
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_NAME: ${DB_NAME}
+
+      JWT_SECRET: ${JWT_SECRET}
+      INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN}
+
+      USER_SERVICE_URL: ${USER_SERVICE_URL}
+      MERCHANT_SERVICE_URL: ${MERCHANT_SERVICE_URL}
 
     ports:
       - "8084:8084"
@@ -104,8 +147,21 @@ services:
 
     restart: always
 
-    env_file:
-      - PaybackService/.env
+    environment:
+      SERVICE_NAME: PaybackService
+      SERVICE_PORT: 8085
+
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_NAME: ${DB_NAME}
+
+      JWT_SECRET: ${JWT_SECRET}
+      INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN}
+
+      USER_SERVICE_URL: ${USER_SERVICE_URL}
+      TRANSACTION_SERVICE_URL: ${TRANSACTION_SERVICE_URL}
 
     ports:
       - "8085:8085"
@@ -123,8 +179,21 @@ services:
 
     restart: always
 
-    env_file:
-      - ReportService/.env
+    environment:
+      SERVICE_NAME: ReportService
+      SERVICE_PORT: 8086
+
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_NAME: ${DB_NAME}
+
+      JWT_SECRET: ${JWT_SECRET}
+      INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN}
+
+      USER_SERVICE_URL: ${USER_SERVICE_URL}
+      TRANSACTION_SERVICE_URL: ${TRANSACTION_SERVICE_URL}
 
     ports:
       - "8086:8086"
@@ -142,8 +211,18 @@ services:
 
     restart: always
 
-    env_file:
-      - APIGateway/.env
+    environment:
+      SERVICE_NAME: APIGateway
+      SERVICE_PORT: 8080
+
+      JWT_SECRET: ${JWT_SECRET}
+
+      AUTH_SERVICE_URL: ${AUTH_SERVICE_URL}
+      USER_SERVICE_URL: ${USER_SERVICE_URL}
+      MERCHANT_SERVICE_URL: ${MERCHANT_SERVICE_URL}
+      TRANSACTION_SERVICE_URL: ${TRANSACTION_SERVICE_URL}
+      PAYBACK_SERVICE_URL: ${PAYBACK_SERVICE_URL}
+      REPORT_SERVICE_URL: ${REPORT_SERVICE_URL}
 
     ports:
       - "8080:8080"
