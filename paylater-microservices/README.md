@@ -45,25 +45,20 @@ Production-ready BNPL (Buy Now, Pay Later) platform built with Go microservices.
 ## Folder Structure
 
 ```
-PayLater/
-├── APIGateway/
-├── AuthService/
-├── UserService/
-├── MerchantService/
-├── TransactionService/
-├── PaybackService/
-├── ReportService/
-├── shared/                 # reusable infra only
-│   ├── config/
-│   ├── constants/
-│   ├── error/
-│   ├── httpclient/
-│   ├── logger/
-│   ├── ratelimit/
-│   ├── requestid/
-│   ├── response/
-│   └── server/
-├── go.work
+paylater-microservices/
+├── backend/
+│   ├── APIGateway/
+│   ├── AuthService/
+│   ├── UserService/
+│   ├── MerchantService/
+│   ├── TransactionService/
+│   ├── PaybackService/
+│   ├── ReportService/
+│   ├── shared/                 # reusable infra only
+│   ├── go.work
+│   ├── docker-compose.yml
+│   └── paylaterdb.sql
+├── frontend/                   # React + TypeScript (Vite)
 ├── .gitignore
 └── README.md
 ```
@@ -119,6 +114,7 @@ Copy each `.env.example` file as `.env`.
 Linux / WSL:
 
 ```bash
+cd backend
 cp AuthService/.env.example AuthService/.env
 cp UserService/.env.example UserService/.env
 cp MerchantService/.env.example MerchantService/.env
@@ -133,18 +129,21 @@ Update the values inside each `.env` file.
 ### Start the application
 
 ```bash
+cd backend
 docker compose up -d
 ```
 
 ### Check running containers
 
 ```bash
+cd backend
 docker compose ps
 ```
 
 ### Stop all containers
 
 ```bash
+cd backend
 docker compose down
 ```
 
@@ -170,13 +169,13 @@ The following pre-built Docker images are available:
 ### Start services (separate terminals)
 
 ```bash
-cd AuthService && go run .
-cd UserService && go run .
-cd MerchantService && go run .
-cd TransactionService && go run .
-cd PaybackService && go run .
-cd ReportService && go run .
-cd APIGateway && go run .
+cd backend/AuthService && go run .
+cd backend/UserService && go run .
+cd backend/MerchantService && go run .
+cd backend/TransactionService && go run .
+cd backend/PaybackService && go run .
+cd backend/ReportService && go run .
+cd backend/APIGateway && go run .
 ```
 
 Clients should call **only** `http://localhost:8080`.
@@ -221,9 +220,9 @@ Gateway / orchestrators also need:
 
 ## Build
 
-From repo root (workspace enabled):
+From `backend/` (workspace enabled):
 
 ```bash
-cd AuthService && go build -o bin/AuthService.exe .
+cd backend/AuthService && go build -o bin/AuthService.exe .
 # repeat per service
 ```

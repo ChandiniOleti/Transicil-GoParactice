@@ -1,0 +1,40 @@
+# ==========================
+# Stage 1 - Build
+# ==========================
+FROM golang:1.25 AS builder
+
+WORKDIR /workspace
+
+# Copy workspace
+COPY go.work ./
+
+# Copy all modules
+COPY shared ./shared
+COPY APIGateway ./APIGateway
+COPY AuthService ./AuthService
+COPY UserService ./UserService
+COPY MerchantService ./MerchantService
+COPY TransactionService ./TransactionService
+COPY PaybackService ./PaybackService
+COPY ReportService ./ReportService
+
+
+# Build API Gateway
+WORKDIR /workspace/APIGateway
+
+RUN go mod download
+RUN go build -o apigateway .
+
+# ==========================
+# Stage 2 - Runtime
+# ==========================
+FROM debian:bookworm-slim
+
+WORKDIR /app
+
+COPY --from=builder /workspace/APIGateway/apigateway .
+COPY --from=builder /workspace/APIGateway/.env ./
+
+EXPOSE 8080
+
+CMD ["./apigateway"]
