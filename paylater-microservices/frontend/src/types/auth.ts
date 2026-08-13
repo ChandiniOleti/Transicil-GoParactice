@@ -31,6 +31,17 @@ export interface LoginRequest {
   password: string
 }
 
+/** Encrypted login body sent over the network for all login endpoints. */
+export interface EncryptedLoginRequest {
+  email: string
+  encrypted_password: string
+}
+
+/** GET /login/public-key response body. */
+export interface LoginPublicKeyResponse {
+  public_key: string
+}
+
 /**
  * Login success body. The `message` text differs by endpoint:
  * - User:     "User Login Successful"
@@ -64,14 +75,12 @@ export interface CreateAdminResponse {
 }
 
 /**
- * Admin row returned by GET /admins.
- * Note: AuthService returns generated.Admin including the password hash.
+ * Admin row returned by GET /admins (password hash is never included).
  */
 export interface Admin {
   id: number
   name: string
   email: string
-  password: string
 }
 
 /**

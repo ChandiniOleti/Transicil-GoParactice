@@ -22,6 +22,14 @@ func main() {
 	logger.Init(config.ServiceName)
 	utils.InitJWT(config.JWTSecret)
 
+	loginPrivateKey, err := config.LoadLoginRSAPrivateKey()
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := utils.InitLoginCrypto(loginPrivateKey); err != nil {
+		log.Fatal("Login crypto init failed:", err)
+	}
+
 	if err := config.ConnectDB(); err != nil {
 		log.Fatal("Database Connection Failed:", err)
 	}

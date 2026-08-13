@@ -5,6 +5,7 @@ import ErrorMessage from '../../components/common/ErrorMessage'
 import Input from '../../components/common/Input'
 import PageContainer from '../../components/layout/PageContainer'
 import Card from '../../components/ui/Card'
+import StatCard from '../../components/ui/StatCard'
 import Modal from '../../components/ui/Modal'
 import Table, { type TableColumn } from '../../components/ui/Table'
 import {
@@ -327,14 +328,28 @@ export default function AdminMerchantsPage() {
           </Button>
         </div>
       ) : (
-        <Card title="All Merchants">
-          <Table
-            columns={merchantColumns}
-            data={merchants}
-            loading={isLoading}
-            emptyMessage="No merchants found."
-          />
-        </Card>
+        <>
+          {!isLoading ? (
+            <section
+              className="pl-admin-stats pl-admin-merchants-stats"
+              aria-label="Merchant summary statistics"
+            >
+              <StatCard
+                label="Total Merchants"
+                value={String(merchants.length)}
+              />
+            </section>
+          ) : null}
+
+          <Card title="All Merchants">
+            <Table
+              columns={merchantColumns}
+              data={merchants}
+              loading={isLoading}
+              emptyMessage="No merchants found."
+            />
+          </Card>
+        </>
       )}
 
       <Modal

@@ -13,10 +13,18 @@ go run .
 
 ## Endpoints
 
-- `POST /login`, `/admin/login`, `/merchant/login` (rate limited)
+- `GET /login/public-key` — RSA public key for encrypted login payloads
+- `POST /login`, `/admin/login`, `/merchant/login` (rate limited; encrypted credentials only)
 - `POST/GET /admins` (JWT + ADMIN)
 - `GET /health`
 
 ## Env
 
-`SERVICE_PORT`, `DB_*`, `JWT_SECRET`, `INTERNAL_API_TOKEN`
+`SERVICE_PORT`, `DB_*`, `JWT_SECRET`, `INTERNAL_API_TOKEN`, `LOGIN_RSA_PRIVATE_KEY`
+
+Generate a local login key with:
+
+```bash
+cd AuthService
+go run scripts/setup_login_key.go
+```

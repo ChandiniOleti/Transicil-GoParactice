@@ -9,6 +9,13 @@ import (
 	"authservice/services"
 )
 
+// AdminResponse is returned to clients without password hashes.
+type AdminResponse struct {
+	ID    int32  `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+}
+
 // GetAdmins returns the list of all admins.
 func GetAdmins(c *gin.Context) {
 	admins, err := services.GetAdmins()
@@ -19,7 +26,16 @@ func GetAdmins(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, admins)
+	response := make([]AdminResponse, 0, len(admins))
+	for _, admin := range admins {
+		response = append(response, AdminResponse{
+			ID:    admin.ID,
+			Name:  admin.Name,
+			Email: admin.Email,
+		})
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 // CreateAdmin creates a new admin.

@@ -4,7 +4,13 @@ import Button from '../../components/common/Button'
 import ErrorMessage from '../../components/common/ErrorMessage'
 import PageContainer from '../../components/layout/PageContainer'
 import Card from '../../components/ui/Card'
+import StatCard from '../../components/ui/StatCard'
 import Table, { type TableColumn } from '../../components/ui/Table'
+import {
+  countPaybacks,
+  countPurchases,
+  sumFeesCollected,
+} from '../../features/admin/adminTransactionUtils'
 import { getTransactions } from '../../services/transactionApi'
 import type { Transaction } from '../../types/transaction'
 import { formatCurrency } from '../../utils/currency'
@@ -82,7 +88,28 @@ export default function AdminTransactionsPage() {
           </Button>
         </div>
       ) : (
-        <Card title="All Transactions">
+        <>
+          {!isLoading ? (
+            <section
+              className="pl-admin-stats pl-admin-transactions-stats"
+              aria-label="Transaction summary statistics"
+            >
+              <StatCard
+                label="Total Purchases"
+                value={String(countPurchases(transactions))}
+              />
+              <StatCard
+                label="Total Paybacks"
+                value={String(countPaybacks(transactions))}
+              />
+              <StatCard
+                label="Fees Collected"
+                value={formatCurrency(sumFeesCollected(transactions).toFixed(2))}
+              />
+            </section>
+          ) : null}
+
+          <Card title="All Transactions">
           <Table
             columns={transactionColumns}
             data={transactions}
@@ -90,6 +117,7 @@ export default function AdminTransactionsPage() {
             emptyMessage="No transactions found."
           />
         </Card>
+        </>
       )}
     </PageContainer>
   )

@@ -8,7 +8,7 @@ import Input from '../../components/common/Input'
 import Card from '../../components/ui/Card'
 import { setCredentials, type AuthUser } from '../../features/auth/authSlice'
 import { adminLogin, login, merchantLogin } from '../../services/authApi'
-import type { AuthRole, LoginRequest, LoginResponse } from '../../types/auth'
+import type { AuthRole, LoginResponse } from '../../types/auth'
 import { getErrorMessage } from '../../utils/error'
 import { readJwtClaims } from '../../utils/jwt'
 import { getDashboardPath } from '../../utils/routes'
@@ -28,15 +28,16 @@ const LOGIN_OPTIONS: Array<{ value: AuthRole; label: string }> = [
 
 async function authenticate(
   role: AuthRole,
-  payload: LoginRequest,
+  email: string,
+  password: string,
 ): Promise<LoginResponse> {
   switch (role) {
     case 'ADMIN':
-      return adminLogin(payload)
+      return adminLogin(email, password)
     case 'MERCHANT':
-      return merchantLogin(payload)
+      return merchantLogin(email, password)
     case 'USER':
-      return login(payload)
+      return login(email, password)
   }
 }
 
@@ -64,6 +65,7 @@ export default function LoginPage() {
   const [loginRole, setLoginRole] = useState<AuthRole>('USER')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const [fieldErrors, setFieldErrors] = useState<FormErrors>({})
   const [formError, setFormError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -98,15 +100,12 @@ export default function LoginPage() {
       return
     }
 
-    const payload: LoginRequest = {
-      email: email.trim(),
-      password,
-    }
+    const trimmedEmail = email.trim()
 
     setIsSubmitting(true)
     try {
-      const response = await authenticate(loginRole, payload)
-      const user = buildAuthUser(response.token, payload.email, loginRole)
+      const response = await authenticate(loginRole, trimmedEmail, password)
+      const user = buildAuthUser(response.token, trimmedEmail, loginRole)
 
       dispatch(
         setCredentials({
@@ -161,18 +160,45 @@ export default function LoginPage() {
           required
         />
 
-        <Input
-          label="Password"
-          id="login-password"
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          error={fieldErrors.password}
-          disabled={isSubmitting}
-          required
-        />
+        <div className="pl-input pl-login-password">
+          <label className="pl-input__label" htmlFor="login-password">
+            Password<span aria-hidden="true"> *</span>
+          </label>
+          <div className="pl-login-password__control">
+            <input
+              id="login-password"
+              name="password"
+              type={isPasswordVisible ? 'text' : 'password'}
+              autoComplete="current-password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              className={`pl-input__field pl-login-password__field${
+                fieldErrors.password ? ' pl-input__field--error' : ''
+              }`}
+              disabled={isSubmitting}
+              required
+              aria-invalid={fieldErrors.password ? true : undefined}
+              aria-describedby={
+                fieldErrors.password ? 'login-password-error' : undefined
+              }
+            />
+            <button
+              type="button"
+              className="pl-login-password__toggle"
+              onClick={() => setIsPasswordVisible((visible) => !visible)}
+              disabled={isSubmitting}
+              aria-label={isPasswordVisible ? 'Hide password' : 'Show password'}
+              aria-pressed={isPasswordVisible}
+            >
+              <span aria-hidden="true">{isPasswordVisible ? '🙈' : '👁'}</span>
+            </button>
+          </div>
+          {fieldErrors.password ? (
+            <p id="login-password-error" className="pl-input__error" role="alert">
+              {fieldErrors.password}
+            </p>
+          ) : null}
+        </div>
 
         {formError ? <ErrorMessage message={formError} title="Login failed" /> : null}
 

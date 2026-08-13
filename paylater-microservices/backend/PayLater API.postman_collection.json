@@ -1,7 +1,8 @@
 {
   "info": {
     "_postman_id": "e2e4937c-3ac5-480d-92de-25d0b35f7ef7",
-    "name": "PayLater API",
+    "name": "PayLater API (RSA Login)",
+    "description": "RSA-OAEP login:\n1. Set collection variable `login_password` (plain text, used only by scripts).\n2. Edit the plaintext `email` directly in each login request body.\n3. Send User Login / Admin login / Merchant Login — pre-request script fetches GET {{baseUrl}}/login/public-key and sets `encrypted_password` automatically.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "42105073"
   },
@@ -723,59 +724,228 @@
       "response": []
     },
     {
+      "name": "Get Login Public Key",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Public key fetched', function () {",
+              "    pm.response.to.have.status(200);",
+              "    pm.expect(pm.response.json().public_key).to.be.a('string').and.not.empty;",
+              "});",
+              "",
+              "const publicKeyPem = pm.response.json().public_key;",
+              "pm.collectionVariables.set('login_public_key', publicKeyPem);",
+              "",
+              "const forge = require('node-forge');",
+              "const password = pm.collectionVariables.get('login_password');",
+              "if (password) {",
+              "    const payload = JSON.stringify({ password, ts: Math.floor(Date.now() / 1000) });",
+              "    const publicKey = forge.pki.publicKeyFromPem(publicKeyPem);",
+              "    const encrypted = publicKey.encrypt(payload, 'RSA-OAEP', { md: forge.md.sha256.create(), mgf1: { md: forge.md.sha256.create() } });",
+              "    pm.collectionVariables.set('encrypted_password', forge.util.encode64(encrypted));",
+              "    console.log('login_public_key cached and encrypted_password set.');",
+              "} else {",
+              "    console.log('login_public_key cached. Set login_password, then run a login request.');",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/login/public-key"
+      },
+      "response": []
+    },
+    {
       "name": "User Login",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const forge = require('node-forge');",
+              "",
+              "async function prepareEncryptedPassword() {",
+              "    const baseUrl = (pm.collectionVariables.get('baseUrl') || 'http://localhost:8080').replace(/\\/$/, '');",
+              "    const password = pm.collectionVariables.get('login_password');",
+              "",
+              "    if (!password) {",
+              "        throw new Error('Collection variable login_password is not set.');",
+              "    }",
+              "",
+              "    let requestBody;",
+              "    try {",
+              "        requestBody = JSON.parse(pm.request.body.raw);",
+              "    } catch (error) {",
+              "        throw new Error('Login request body must be valid JSON with an email field.');",
+              "    }",
+              "",
+              "    if (!requestBody.email) {",
+              "        throw new Error('Login request body must include email.');",
+              "    }",
+              "",
+              "    const keyResponse = await pm.sendRequest({",
+              "        url: `${baseUrl}/login/public-key`,",
+              "        method: 'GET',",
+              "        header: { Accept: 'application/json' },",
+              "    });",
+              "",
+              "    if (keyResponse.code !== 200) {",
+              "        throw new Error(`GET /login/public-key failed with status ${keyResponse.code}`);",
+              "    }",
+              "",
+              "    const keyBody = keyResponse.json();",
+              "    const publicKeyPem = keyBody && keyBody.public_key;",
+              "",
+              "    if (!publicKeyPem) {",
+              "        throw new Error('GET /login/public-key did not return public_key.');",
+              "    }",
+              "",
+              "    const payload = JSON.stringify({",
+              "        password: password,",
+              "        ts: Math.floor(Date.now() / 1000),",
+              "    });",
+              "",
+              "    const publicKey = forge.pki.publicKeyFromPem(publicKeyPem);",
+              "    const encrypted = publicKey.encrypt(payload, 'RSA-OAEP', {",
+              "        md: forge.md.sha256.create(),",
+              "        mgf1: { md: forge.md.sha256.create() },",
+              "    });",
+              "",
+              "    const encryptedPassword = forge.util.encode64(encrypted);",
+              "",
+              "    pm.collectionVariables.set('encrypted_password', encryptedPassword);",
+              "    pm.variables.set('encrypted_password', encryptedPassword);",
+              "",
+              "    pm.request.body.raw = JSON.stringify({",
+              "        email: requestBody.email,",
+              "        encrypted_password: encryptedPassword,",
+              "    }, null, 2);",
+              "}",
+              "",
+              "await prepareEncryptedPassword();"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "POST",
-        "header": [],
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n    \"email\": \"Bhargavi@gmail.com\",\r\n    \"password\": \"Bhargavi@2007\"\r\n}",
+          "raw": "{\n  \"email\": \"user@example.com\",\n  \"encrypted_password\": \"{{encrypted_password}}\"\n}",
           "options": {
             "raw": {
               "language": "json"
             }
           }
         },
-        "url": {
-          "raw": "http://localhost:8080/login",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "8080",
-          "path": [
-            "login"
-          ]
-        }
+        "url": "{{baseUrl}}/login"
       },
       "response": []
     },
     {
       "name": "Admin login",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const forge = require('node-forge');",
+              "",
+              "async function prepareEncryptedPassword() {",
+              "    const baseUrl = (pm.collectionVariables.get('baseUrl') || 'http://localhost:8080').replace(/\\/$/, '');",
+              "    const password = pm.collectionVariables.get('login_password');",
+              "",
+              "    if (!password) {",
+              "        throw new Error('Collection variable login_password is not set.');",
+              "    }",
+              "",
+              "    let requestBody;",
+              "    try {",
+              "        requestBody = JSON.parse(pm.request.body.raw);",
+              "    } catch (error) {",
+              "        throw new Error('Login request body must be valid JSON with an email field.');",
+              "    }",
+              "",
+              "    if (!requestBody.email) {",
+              "        throw new Error('Login request body must include email.');",
+              "    }",
+              "",
+              "    const keyResponse = await pm.sendRequest({",
+              "        url: `${baseUrl}/login/public-key`,",
+              "        method: 'GET',",
+              "        header: { Accept: 'application/json' },",
+              "    });",
+              "",
+              "    if (keyResponse.code !== 200) {",
+              "        throw new Error(`GET /login/public-key failed with status ${keyResponse.code}`);",
+              "    }",
+              "",
+              "    const keyBody = keyResponse.json();",
+              "    const publicKeyPem = keyBody && keyBody.public_key;",
+              "",
+              "    if (!publicKeyPem) {",
+              "        throw new Error('GET /login/public-key did not return public_key.');",
+              "    }",
+              "",
+              "    const payload = JSON.stringify({",
+              "        password: password,",
+              "        ts: Math.floor(Date.now() / 1000),",
+              "    });",
+              "",
+              "    const publicKey = forge.pki.publicKeyFromPem(publicKeyPem);",
+              "    const encrypted = publicKey.encrypt(payload, 'RSA-OAEP', {",
+              "        md: forge.md.sha256.create(),",
+              "        mgf1: { md: forge.md.sha256.create() },",
+              "    });",
+              "",
+              "    const encryptedPassword = forge.util.encode64(encrypted);",
+              "",
+              "    pm.collectionVariables.set('encrypted_password', encryptedPassword);",
+              "    pm.variables.set('encrypted_password', encryptedPassword);",
+              "",
+              "    pm.request.body.raw = JSON.stringify({",
+              "        email: requestBody.email,",
+              "        encrypted_password: encryptedPassword,",
+              "    }, null, 2);",
+              "}",
+              "",
+              "await prepareEncryptedPassword();"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "POST",
-        "header": [],
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n    \"email\": \"admin@gmail.com\",\r\n    \"password\": \"Admin@123\"\r\n}",
+          "raw": "{\n  \"email\": \"admin@gmail.com\",\n  \"encrypted_password\": \"{{encrypted_password}}\"\n}",
           "options": {
             "raw": {
               "language": "json"
             }
           }
         },
-        "url": {
-          "raw": "POST http://localhost:8080/admin/login",
-          "protocol": "POST http",
-          "host": [
-            "localhost"
-          ],
-          "port": "8080",
-          "path": [
-            "admin",
-            "login"
-          ]
-        }
+        "url": "{{baseUrl}}/admin/login"
       },
       "response": []
     },
@@ -855,9 +1025,95 @@
     },
     {
       "name": "Merchant Login",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const forge = require('node-forge');",
+              "",
+              "async function prepareEncryptedPassword() {",
+              "    const baseUrl = (pm.collectionVariables.get('baseUrl') || 'http://localhost:8080').replace(/\\/$/, '');",
+              "    const password = pm.collectionVariables.get('login_password');",
+              "",
+              "    if (!password) {",
+              "        throw new Error('Collection variable login_password is not set.');",
+              "    }",
+              "",
+              "    let requestBody;",
+              "    try {",
+              "        requestBody = JSON.parse(pm.request.body.raw);",
+              "    } catch (error) {",
+              "        throw new Error('Login request body must be valid JSON with an email field.');",
+              "    }",
+              "",
+              "    if (!requestBody.email) {",
+              "        throw new Error('Login request body must include email.');",
+              "    }",
+              "",
+              "    const keyResponse = await pm.sendRequest({",
+              "        url: `${baseUrl}/login/public-key`,",
+              "        method: 'GET',",
+              "        header: { Accept: 'application/json' },",
+              "    });",
+              "",
+              "    if (keyResponse.code !== 200) {",
+              "        throw new Error(`GET /login/public-key failed with status ${keyResponse.code}`);",
+              "    }",
+              "",
+              "    const keyBody = keyResponse.json();",
+              "    const publicKeyPem = keyBody && keyBody.public_key;",
+              "",
+              "    if (!publicKeyPem) {",
+              "        throw new Error('GET /login/public-key did not return public_key.');",
+              "    }",
+              "",
+              "    const payload = JSON.stringify({",
+              "        password: password,",
+              "        ts: Math.floor(Date.now() / 1000),",
+              "    });",
+              "",
+              "    const publicKey = forge.pki.publicKeyFromPem(publicKeyPem);",
+              "    const encrypted = publicKey.encrypt(payload, 'RSA-OAEP', {",
+              "        md: forge.md.sha256.create(),",
+              "        mgf1: { md: forge.md.sha256.create() },",
+              "    });",
+              "",
+              "    const encryptedPassword = forge.util.encode64(encrypted);",
+              "",
+              "    pm.collectionVariables.set('encrypted_password', encryptedPassword);",
+              "    pm.variables.set('encrypted_password', encryptedPassword);",
+              "",
+              "    pm.request.body.raw = JSON.stringify({",
+              "        email: requestBody.email,",
+              "        encrypted_password: encryptedPassword,",
+              "    }, null, 2);",
+              "}",
+              "",
+              "await prepareEncryptedPassword();"
+            ]
+          }
+        }
+      ],
       "request": {
-        "method": "GET",
-        "header": []
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"merchant@example.com\",\n  \"encrypted_password\": \"{{encrypted_password}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/merchant/login"
       },
       "response": []
     },
@@ -1065,6 +1321,19 @@
     }
   ],
   "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "login_password",
+      "value": "",
+      "secret": true
+    },
+    {
+      "key": "encrypted_password",
+      "value": ""
+    },
     {
       "key": "supabase_service_role_api_key_0moq",
       "secret": true

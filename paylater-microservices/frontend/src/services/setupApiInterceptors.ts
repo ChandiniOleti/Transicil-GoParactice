@@ -13,6 +13,7 @@ function isPublicAuthRequest(url: string | undefined, method: string | undefined
   const normalizedMethod = method?.toLowerCase()
 
   if (
+    url.endsWith('/login/public-key') ||
     url.endsWith('/login') ||
     url.endsWith('/admin/login') ||
     url.endsWith('/merchant/login')

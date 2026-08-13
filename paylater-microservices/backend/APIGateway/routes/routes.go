@@ -23,6 +23,7 @@ func SetupRoutes(router *gin.Engine) {
 	router.GET("/health", server.HealthHandler(config.ServiceName, nil))
 
 	// AUTH — no gateway rate limiting (public limits applied at AuthService)
+	router.GET("/login/public-key", auth)
 	router.POST("/login", auth)
 	router.POST("/admin/login", auth)
 	router.POST("/merchant/login", auth)

@@ -5,9 +5,11 @@ import ErrorMessage from '../../components/common/ErrorMessage'
 import Input from '../../components/common/Input'
 import PageContainer from '../../components/layout/PageContainer'
 import Card from '../../components/ui/Card'
+import StatCard from '../../components/ui/StatCard'
 import Modal from '../../components/ui/Modal'
 import Table, { type TableColumn } from '../../components/ui/Table'
 import { deleteUser, getUsers, updateUser } from '../../services/userApi'
+import { sumUserTotalDue } from '../../features/admin/adminUserUtils'
 import type { User } from '../../types/user'
 import { formatCurrency } from '../../utils/currency'
 import { getErrorMessage } from '../../utils/error'
@@ -233,7 +235,21 @@ export default function AdminUsersPage() {
           </Button>
         </div>
       ) : (
-        <Card title="All Users">
+        <>
+          {!isLoading ? (
+            <section
+              className="pl-admin-stats pl-admin-users-stats"
+              aria-label="User summary statistics"
+            >
+              <StatCard label="Total Users" value={String(users.length)} />
+              <StatCard
+                label="Total Due Amount"
+                value={formatCurrency(sumUserTotalDue(users).toFixed(2))}
+              />
+            </section>
+          ) : null}
+
+          <Card title="All Users">
           <Table
             columns={userColumns}
             data={users}
@@ -241,6 +257,7 @@ export default function AdminUsersPage() {
             emptyMessage="No users found."
           />
         </Card>
+        </>
       )}
 
       <Modal

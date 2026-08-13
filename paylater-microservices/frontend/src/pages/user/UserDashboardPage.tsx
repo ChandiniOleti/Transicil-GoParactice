@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 
 import { useAppSelector } from '../../app/hooks'
 import Button from '../../components/common/Button'
@@ -63,6 +64,20 @@ export default function UserDashboardPage() {
         <div className="pl-user-dashboard">
           <UserSummary user={user} />
           <FinancialSummary user={user} />
+          <div className="pl-user-profile__actions">
+            <Link
+              to="/user/purchase"
+              className="pl-button pl-button--primary pl-button--medium"
+            >
+              Make Purchase
+            </Link>
+            <Link
+              to="/user/transactions"
+              className="pl-button pl-button--secondary pl-button--medium"
+            >
+              View Transactions
+            </Link>
+          </div>
         </div>
       ) : null}
     </PageContainer>

@@ -55,29 +55,35 @@ export default function AdminReportTables({
 }: AdminReportTablesProps) {
   return (
     <div className="pl-admin-report-tables">
-      <Card title="Users with Outstanding Dues">
-        <Table
-          columns={userReportColumns}
-          data={usersWithDue}
-          emptyMessage="No users with outstanding dues."
-        />
-      </Card>
+      <div id="report-users-with-due" className="pl-admin-report-section">
+        <Card title="Users with Outstanding Dues">
+          <Table
+            columns={userReportColumns}
+            data={usersWithDue}
+            emptyMessage="No users with outstanding dues."
+          />
+        </Card>
+      </div>
 
-      <Card title="Users at Credit Limit">
-        <Table
-          columns={userReportColumns}
-          data={creditLimitUsers}
-          emptyMessage="No users at credit limit."
-        />
-      </Card>
+      <div id="report-credit-limit-users" className="pl-admin-report-section">
+        <Card title="Users at Credit Limit">
+          <Table
+            columns={userReportColumns}
+            data={creditLimitUsers}
+            emptyMessage="No users at credit limit."
+          />
+        </Card>
+      </div>
 
-      <Card title="Merchant Commission Summary">
-        <Table
-          columns={merchantFeeColumns}
-          data={merchantFees}
-          emptyMessage="No merchant commission data available."
-        />
-      </Card>
+      <div id="report-merchant-commission" className="pl-admin-report-section">
+        <Card title="Merchant Commission Summary">
+          <Table
+            columns={merchantFeeColumns}
+            data={merchantFees}
+            emptyMessage="No merchant commission data available."
+          />
+        </Card>
+      </div>
     </div>
   )
 }

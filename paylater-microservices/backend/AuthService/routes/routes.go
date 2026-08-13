@@ -18,6 +18,7 @@ func SetupRoutes(router *gin.Engine, limit rate.Limit, burst int) {
 	publicLimit := ratelimit.Middleware(limit, burst)
 
 	// Public login routes (rate limited)
+	router.GET("/login/public-key", publicLimit, handlers.LoginPublicKeyHandler)
 	router.POST("/login", publicLimit, handlers.LoginHandler)
 	router.POST("/admin/login", publicLimit, handlers.AdminLoginHandler)
 	router.POST("/merchant/login", publicLimit, handlers.MerchantLoginHandler)

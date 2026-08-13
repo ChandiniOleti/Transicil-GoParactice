@@ -16,6 +16,9 @@ coverage.*
 .env
 .env.local
 .env.*.local
+*.pem
+login_private.pem
+backend/AuthService/login_private.pem
 
 # IDE / editor
 .idea/

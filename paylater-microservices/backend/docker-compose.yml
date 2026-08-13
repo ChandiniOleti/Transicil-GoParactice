@@ -40,6 +40,7 @@ services:
 
       JWT_SECRET: ${JWT_SECRET}
       INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN}
+      LOGIN_RSA_PRIVATE_KEY: ${LOGIN_RSA_PRIVATE_KEY}
 
     ports:
       - "8081:8081"

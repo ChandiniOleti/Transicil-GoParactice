@@ -189,10 +189,6 @@ export default function RegisterPage() {
     }
 
     const trimmedEmail = email.trim()
-    const loginPayload = {
-      email: trimmedEmail,
-      password,
-    }
 
     setIsSubmitting(true)
     try {
@@ -203,7 +199,7 @@ export default function RegisterPage() {
           password,
         })
 
-        const loginResponse = await login(loginPayload)
+        const loginResponse = await login(trimmedEmail, password)
         const user = buildAuthUser(loginResponse.token, trimmedEmail, 'USER')
 
         dispatch(
@@ -225,7 +221,7 @@ export default function RegisterPage() {
         password,
       })
 
-      const loginResponse = await merchantLogin(loginPayload)
+      const loginResponse = await merchantLogin(trimmedEmail, password)
       const user = buildAuthUser(loginResponse.token, trimmedEmail, 'MERCHANT')
 
       dispatch(
