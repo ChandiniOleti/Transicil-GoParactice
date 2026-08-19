@@ -77,47 +77,120 @@ const readDate = (value: unknown): string | null => {
 };
 
 const mapPlayer = (player: RawPlayer): Player => ({
-  playerID: readString(player.playerID ?? player.Playerid) ?? "",
+  playerID: readString(
+    player.playerID ?? player.Playerid
+  ) ?? "",
 
-  birthYear: readNumber(player.birthYear ?? player.Birthyear),
-  birthMonth: readNumber(player.birthMonth ?? player.Birthmonth),
-  birthDay: readNumber(player.birthDay ?? player.Birthday),
-  birthCountry: readString(player.birthCountry ?? player.Birthcountry),
-  birthState: readString(player.birthState ?? player.Birthstate),
-  birthCity: readString(player.birthCity ?? player.Birthcity),
+  birthYear: readNumber(
+    player.birthYear ?? player.Birthyear
+  ),
 
-  deathYear: readNumber(player.deathYear ?? player.Deathyear),
-  deathMonth: readNumber(player.deathMonth ?? player.Deathmonth),
-  deathDay: readNumber(player.deathDay ?? player.Deathday),
-  deathCountry: readString(player.deathCountry ?? player.Deathcountry),
-  deathState: readString(player.deathState ?? player.Deathstate),
-  deathCity: readString(player.deathCity ?? player.Deathcity),
+  birthMonth: readNumber(
+    player.birthMonth ?? player.Birthmonth
+  ),
 
-  nameFirst: readString(player.nameFirst ?? player.Namefirst),
-  nameLast: readString(player.nameLast ?? player.Namelast),
-  nameGiven: readString(player.nameGiven ?? player.Namegiven),
+  birthDay: readNumber(
+    player.birthDay ?? player.Birthday
+  ),
 
-  weight: readNumber(player.weight ?? player.Weight),
-  height: readNumber(player.height ?? player.Height),
-  bats: readString(player.bats ?? player.Bats),
-  throws: readString(player.throws ?? player.Throws),
+  birthCountry: readString(
+    player.birthCountry ?? player.Birthcountry
+  ),
 
-  debut: readDate(player.debut ?? player.Debut),
-  finalGame: readDate(player.finalGame ?? player.Finalgame),
-  retroID: readString(player.retroID ?? player.Retroid),
-  bbrefID: readString(player.bbrefID ?? player.Bbrefid),
+  birthState: readString(
+    player.birthState ?? player.Birthstate
+  ),
+
+  birthCity: readString(
+    player.birthCity ?? player.Birthcity
+  ),
+
+  deathYear: readNumber(
+    player.deathYear ?? player.Deathyear
+  ),
+
+  deathMonth: readNumber(
+    player.deathMonth ?? player.Deathmonth
+  ),
+
+  deathDay: readNumber(
+    player.deathDay ?? player.Deathday
+  ),
+
+  deathCountry: readString(
+    player.deathCountry ?? player.Deathcountry
+  ),
+
+  deathState: readString(
+    player.deathState ?? player.Deathstate
+  ),
+
+  deathCity: readString(
+    player.deathCity ?? player.Deathcity
+  ),
+
+  nameFirst: readString(
+    player.nameFirst ?? player.Namefirst
+  ),
+
+  nameLast: readString(
+    player.nameLast ?? player.Namelast
+  ),
+
+  nameGiven: readString(
+    player.nameGiven ?? player.Namegiven
+  ),
+
+  weight: readNumber(
+    player.weight ?? player.Weight
+  ),
+
+  height: readNumber(
+    player.height ?? player.Height
+  ),
+
+  bats: readString(
+    player.bats ?? player.Bats
+  ),
+
+  throws: readString(
+    player.throws ?? player.Throws
+  ),
+
+  debut: readDate(
+    player.debut ?? player.Debut
+  ),
+
+  finalGame: readDate(
+    player.finalGame ?? player.Finalgame
+  ),
+
+  retroID: readString(
+    player.retroID ?? player.Retroid
+  ),
+
+  bbrefID: readString(
+    player.bbrefID ?? player.Bbrefid
+  ),
 });
 
 export const getPlayers = async (
   page: number,
-  limit: number
+  limit: number,
+  searchName: string = ""
 ): Promise<PlayersResponse> => {
-  const response = await api.get<RawPlayersResponse>("/players", {
-    params: {
-      page,
-      limit,
-    },
-  });
+  const response = await api.get<RawPlayersResponse>(
+    "/players",
+    {
+      params: {
+        page,
+        limit,
+
+        // Backend expects ?name=
+        name: searchName || undefined,
+      },
+    }
+  );
 
   return {
     ...response.data,

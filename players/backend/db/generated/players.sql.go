@@ -107,11 +107,118 @@ func (q *Queries) GetPlayers(ctx context.Context, arg GetPlayersParams) ([]Playe
 }
 
 const getPlayersCount = `-- name: GetPlayersCount :one
-SELECT COUNT(*) FROM players
+SELECT COUNT(*)
+FROM players
 `
 
 func (q *Queries) GetPlayersCount(ctx context.Context) (int64, error) {
 	row := q.db.QueryRowContext(ctx, getPlayersCount)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const searchPlayers = `-- name: SearchPlayers :many
+SELECT playerid, birthyear, birthmonth, birthday, birthcountry, birthstate, birthcity, deathyear, deathmonth, deathday, deathcountry, deathstate, deathcity, namefirst, namelast, namegiven, weight, height, bats, throws, debut, finalgame, retroid, bbrefid
+FROM players
+WHERE LOWER(nameFirst) LIKE CONCAT('%', LOWER(?), '%')
+   OR LOWER(nameLast) LIKE CONCAT('%', LOWER(?), '%')
+   OR LOWER(CONCAT(nameFirst, ' ', nameLast))
+      LIKE CONCAT('%', LOWER(?), '%')
+   OR LOWER(CONCAT(nameFirst, nameLast))
+      LIKE CONCAT('%', LOWER(REPLACE(?, ' ', '')), '%')
+LIMIT ? OFFSET ?
+`
+
+type SearchPlayersParams struct {
+	LOWER   string
+	LOWER_2 string
+	LOWER_3 string
+	REPLACE string
+	Limit   int32
+	Offset  int32
+}
+
+func (q *Queries) SearchPlayers(ctx context.Context, arg SearchPlayersParams) ([]Player, error) {
+	rows, err := q.db.QueryContext(ctx, searchPlayers,
+		arg.LOWER,
+		arg.LOWER_2,
+		arg.LOWER_3,
+		arg.REPLACE,
+		arg.Limit,
+		arg.Offset,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Player
+	for rows.Next() {
+		var i Player
+		if err := rows.Scan(
+			&i.Playerid,
+			&i.Birthyear,
+			&i.Birthmonth,
+			&i.Birthday,
+			&i.Birthcountry,
+			&i.Birthstate,
+			&i.Birthcity,
+			&i.Deathyear,
+			&i.Deathmonth,
+			&i.Deathday,
+			&i.Deathcountry,
+			&i.Deathstate,
+			&i.Deathcity,
+			&i.Namefirst,
+			&i.Namelast,
+			&i.Namegiven,
+			&i.Weight,
+			&i.Height,
+			&i.Bats,
+			&i.Throws,
+			&i.Debut,
+			&i.Finalgame,
+			&i.Retroid,
+			&i.Bbrefid,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchPlayersCount = `-- name: SearchPlayersCount :one
+SELECT COUNT(*)
+FROM players
+WHERE LOWER(nameFirst) LIKE CONCAT('%', LOWER(?), '%')
+   OR LOWER(nameLast) LIKE CONCAT('%', LOWER(?), '%')
+   OR LOWER(CONCAT(nameFirst, ' ', nameLast))
+      LIKE CONCAT('%', LOWER(?), '%')
+   OR LOWER(CONCAT(nameFirst, nameLast))
+      LIKE CONCAT('%', LOWER(REPLACE(?, ' ', '')), '%')
+`
+
+type SearchPlayersCountParams struct {
+	LOWER   string
+	LOWER_2 string
+	LOWER_3 string
+	REPLACE string
+}
+
+func (q *Queries) SearchPlayersCount(ctx context.Context, arg SearchPlayersCountParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, searchPlayersCount,
+		arg.LOWER,
+		arg.LOWER_2,
+		arg.LOWER_3,
+		arg.REPLACE,
+	)
 	var count int64
 	err := row.Scan(&count)
 	return count, err

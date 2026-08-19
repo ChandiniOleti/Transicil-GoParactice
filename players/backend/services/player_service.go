@@ -25,69 +25,91 @@ func toPlayer(p generated.Player) models.Player {
 	if p.Birthyear.Valid {
 		player.BirthYear = &p.Birthyear.Int32
 	}
+
 	if p.Birthmonth.Valid {
 		player.BirthMonth = &p.Birthmonth.Int32
 	}
+
 	if p.Birthday.Valid {
 		player.BirthDay = &p.Birthday.Int32
 	}
+
 	if p.Birthcountry.Valid {
 		player.BirthCountry = &p.Birthcountry.String
 	}
+
 	if p.Birthstate.Valid {
 		player.BirthState = &p.Birthstate.String
 	}
+
 	if p.Birthcity.Valid {
 		player.BirthCity = &p.Birthcity.String
 	}
+
 	if p.Deathyear.Valid {
 		player.DeathYear = &p.Deathyear.Int32
 	}
+
 	if p.Deathmonth.Valid {
 		player.DeathMonth = &p.Deathmonth.Int32
 	}
+
 	if p.Deathday.Valid {
 		player.DeathDay = &p.Deathday.Int32
 	}
+
 	if p.Deathcountry.Valid {
 		player.DeathCountry = &p.Deathcountry.String
 	}
+
 	if p.Deathstate.Valid {
 		player.DeathState = &p.Deathstate.String
 	}
+
 	if p.Deathcity.Valid {
 		player.DeathCity = &p.Deathcity.String
 	}
+
 	if p.Namefirst.Valid {
 		player.NameFirst = &p.Namefirst.String
 	}
+
 	if p.Namelast.Valid {
 		player.NameLast = &p.Namelast.String
 	}
+
 	if p.Namegiven.Valid {
 		player.NameGiven = &p.Namegiven.String
 	}
+
 	if p.Weight.Valid {
 		player.Weight = &p.Weight.Int32
 	}
+
 	if p.Height.Valid {
 		player.Height = &p.Height.Int32
 	}
+
 	if p.Bats.Valid {
 		player.Bats = &p.Bats.String
 	}
+
 	if p.Throws.Valid {
 		player.Throws = &p.Throws.String
 	}
+
 	if p.Debut.Valid {
 		player.Debut = &p.Debut.Time
 	}
+
 	if p.Finalgame.Valid {
 		player.FinalGame = &p.Finalgame.Time
 	}
+
 	if p.Retroid.Valid {
 		player.RetroID = &p.Retroid.String
 	}
+
 	if p.Bbrefid.Valid {
 		player.BbrefID = &p.Bbrefid.String
 	}
@@ -100,10 +122,15 @@ func (s *PlayerService) GetPlayers(
 	limit int32,
 	offset int32,
 ) ([]models.Player, error) {
-	players, err := s.Queries.GetPlayers(ctx, generated.GetPlayersParams{
-		Limit:  limit,
-		Offset: offset,
-	})
+
+	players, err := s.Queries.GetPlayers(
+		ctx,
+		generated.GetPlayersParams{
+			Limit:  limit,
+			Offset: offset,
+		},
+	)
+
 	if err != nil {
 		return nil, err
 	}
@@ -117,11 +144,64 @@ func (s *PlayerService) GetPlayers(
 	return result, nil
 }
 
+func (s *PlayerService) SearchPlayers(
+	ctx context.Context,
+	name string,
+	limit int32,
+	offset int32,
+) ([]models.Player, error) {
+
+	players, err := s.Queries.SearchPlayers(
+		ctx,
+		generated.SearchPlayersParams{
+			LOWER:   name,
+			LOWER_2: name,
+			LOWER_3: name,
+			REPLACE: name,
+			Limit:   limit,
+			Offset:  offset,
+		},
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]models.Player, 0, len(players))
+
+	for _, p := range players {
+		result = append(result, toPlayer(p))
+	}
+
+	return result, nil
+}
+
+func (s *PlayerService) SearchPlayersCount(
+	ctx context.Context,
+	name string,
+) (int64, error) {
+
+	return s.Queries.SearchPlayersCount(
+		ctx,
+		generated.SearchPlayersCountParams{
+			LOWER:   name,
+			LOWER_2: name,
+			LOWER_3: name,
+			REPLACE: name,
+		},
+	)
+}
+
 func (s *PlayerService) GetPlayerByID(
 	ctx context.Context,
 	playerID string,
 ) (models.Player, error) {
-	player, err := s.Queries.GetPlayerByID(ctx, playerID)
+
+	player, err := s.Queries.GetPlayerByID(
+		ctx,
+		playerID,
+	)
+
 	if err != nil {
 		return models.Player{}, err
 	}
@@ -132,5 +212,6 @@ func (s *PlayerService) GetPlayerByID(
 func (s *PlayerService) GetPlayersCount(
 	ctx context.Context,
 ) (int64, error) {
+
 	return s.Queries.GetPlayersCount(ctx)
 }
